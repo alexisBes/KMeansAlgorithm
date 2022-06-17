@@ -1,3 +1,4 @@
+import java.awt.Color
 import java.awt.image.BufferedImage
 import java.io.File
 import java.io.IOException
@@ -6,7 +7,9 @@ import javax.imageio.ImageIO
 
 
 object KMean {
+    // résolution de l'image
     var rgb = IntArray(1920 * 1080)
+    var nrgb = IntArray(1920 * 1080)
     var r = IntArray(1920 * 1080)
     var g = IntArray(1920 * 1080)
     var b = IntArray(1920 * 1080)
@@ -14,8 +17,9 @@ object KMean {
     @JvmStatic
     fun main(args: Array<String>) {
         try {
-            val originalImage = ImageIO.read(File("D:\\dev_mobile\\compressionTest\\src\\test.bmp"))
-            val k = 43
+            val originalImage = ImageIO.read(File("D:\\dev_mobile\\compressionTest\\src\\test.jpg"))
+            // k
+            val k = 2
             val kmeansJpg = kmeans_helper(originalImage, k)
             println("Printing Image.....")
             ImageIO.write(
@@ -32,8 +36,6 @@ object KMean {
         val w = originalImage.width
         val h = originalImage.height
         val kmeansImage = BufferedImage(w, h, originalImage.type)
-        val g1 = kmeansImage.createGraphics()
-        g1.drawImage(originalImage, 0, 0, w, h, null)
         // Read rgb values from the image
         var count = 0
         for (i in 0 until w) {
@@ -42,7 +44,6 @@ object KMean {
                 count++
             }
         }
-
         //Create K buckets or classes
         var kpoints = Selector(k, w, h)
         // Call kmeans algorithm: update the rgb values
@@ -50,15 +51,16 @@ object KMean {
         // update RGB array from R G and B
         val l = 0
         for (i in 0 until w * h) {
-            rgb[i] = r[i] and 0x0ff shl 16 or (g[i] and 0x0ff shl 8) or (b[i] and 0x0ff)
-            println("Pixel number=" + i + "    RGB value=" + rgb[i])
+            //nrgb[i] = r[i] and 0x0ff shl 16 or (g[i] and 0x0ff shl 8) or (b[i] and 0x0ff)
+            nrgb[i] = Color(r[i], g[i], b[i]).rgb
+            //println("Pixel number=" + i + "    RGB value=" + nrgb[i])
         }
 
         // Write the new rgb values to the image
         count = 0
         for (i in 0 until w) {
             for (j in 0 until h) {
-                kmeansImage.setRGB(i, j, rgb[count++])
+                kmeansImage.setRGB(i, j, nrgb[count++])
             }
         }
         println("Returning Object")
@@ -98,11 +100,11 @@ object KMean {
         r[temp] = r[ti + 100]
         g[temp] = g[ti + 100]
         b[temp] = b[ti + 100]
-        //r[temp]=0;
-        //g[temp]=0;
-        //b[temp]=0;
+//        b[temp]=0;
+//        r[temp]=0;
+//        g[temp]=0;
 
-        //System.out.println(Arrays.toString(kpoints));
+        //println(kpoints.contentToString());
         return kpoints
     }
 
@@ -123,13 +125,15 @@ object KMean {
     private fun FindLeastDist(distances: Array<DoubleArray>, w: Int, h: Int, k: Int): IntArray {
         var ti = 0
         var tj = 0
-        var temp = 100000.0
-        for (i in 0 until w * h) for (j in 0 until k) {
-            if (distances[j][i].toInt() != 0 && distances[j][i] < temp) {
-                temp = distances[j][i]
-                ti = i
-                tj = j
-                //System.out.println(temp+"     j="+j+"     i="+i);
+        var temp = Double.MAX_VALUE
+        for (i in 0 until w * h) {
+            for (j in 0 until k) {
+                if (distances[j][i].toInt() != 0 && distances[j][i] < temp) {
+                    temp = distances[j][i]
+                    ti = i
+                    tj = j
+                }
+                println("$temp     j=$j     i=$i + dist=${distances[j][i]}")
             }
         }
         val answer = IntArray(3)
