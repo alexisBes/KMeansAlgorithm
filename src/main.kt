@@ -1,4 +1,5 @@
 import distance.EucledianDistance
+import distance.RandomDistance
 import java.awt.image.BufferedImage
 import java.io.File
 import javax.imageio.ImageIO
@@ -16,7 +17,7 @@ fun main() {
             count++
         }
     }
-    val algo = KMeans(30, 10, EucledianDistance())
+    val algo = KMeans(40, 10, EucledianDistance())
     val newPoints = algo.execute(points)
     println("C'est partit pour l'algo ....")
     val kmeansImage =  BufferedImage(w, h, originalImage.type)
