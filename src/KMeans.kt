@@ -1,4 +1,5 @@
 import distance.Distance
+import kotlin.collections.ArrayList
 import kotlin.random.Random
 
 class KMeans(val K: Int, val maxIter: Int, val distance: Distance) {
@@ -12,27 +13,26 @@ class KMeans(val K: Int, val maxIter: Int, val distance: Distance) {
 
     private fun findMinimalDistanceInPixel(point: Pixel): Int {
         var index = Int.MAX_VALUE
-        var minDistance = Pixel(Int.MAX_VALUE, Int.MAX_VALUE, Int.MAX_VALUE)
-        for (i in 0 until centroids.size) {
+        var minDistance = Int.MAX_VALUE
+        for (i in centroids.indices) {
             val distR = distance.calculateDistance(point.R, centroids[i].R)
             val distG = distance.calculateDistance(point.G, centroids[i].G)
             val distB = distance.calculateDistance(point.B, centroids[i].B)
             val distTotal = distR + distB + distG
-            if (distTotal < minDistance.sum()) {
+            if (distTotal < minDistance) {
                 index = i
-                minDistance = centroids[i]
+                minDistance = distTotal
             }
         }
         return index
     }
 
     private fun movePixel(points: Array<Pixel>): Array<Pixel> {
-        val newPoints = points
         for (i in points.indices) {
             val centroidIndex = findMinimalDistanceInPixel(points[i])
-            newPoints[i] = centroids[centroidIndex]
+            points[i] = centroids[centroidIndex]
         }
-        return newPoints
+        return points
     }
 
     fun execute(points: Array<Pixel>): Array<Pixel> {
@@ -40,14 +40,28 @@ class KMeans(val K: Int, val maxIter: Int, val distance: Distance) {
         initializeCentroids(points)
         for (i in 0 until maxIter) {
             println("iteration num $i")
-            centroids = moveCentroids(points)
             newPoints = movePixel(points)
+            centroids = moveCentroids(points)
         }
         return newPoints
     }
 
     private fun moveCentroids(points: Array<Pixel>): ArrayList<Pixel> {
+        val newCentroid: Array<Pixel> = Array(K) { Pixel(0, 0, 0) }
+        val nbCentroid: Array<Int> = Array(K) { 0 }
 
-        return ArrayList();
+        for (i in points.indices) {
+            for (j in 0 until 6) {
+                if (centroids[j].isPixelEquals(points[i])) {
+                    newCentroid[j].add(points[i])
+                    nbCentroid[j]++
+                }
+            }
+        }
+
+        for (i in newCentroid.indices) {
+            newCentroid[i].multiply(1.0 / nbCentroid[i])
+        }
+        return newCentroid.toCollection(ArrayList<Pixel>())
     }
 }
