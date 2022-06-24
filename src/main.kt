@@ -6,7 +6,7 @@ import java.io.File
 import javax.imageio.ImageIO
 
 fun main() {
-    val originalImage = ImageIO.read(File("src/test.jpg"))
+    val originalImage = ImageIO.read(File("src/test.bmp"))
 
     val w = originalImage.width
     val h = originalImage.height
@@ -33,5 +33,10 @@ fun main() {
         kmeansImage,
         "jpg",
         File("decompressed.jpg")
+    )
+    ImageIO.write(
+        originalImage,
+        "jpg",
+        File("uncompressed.jpg")
     )
 }
